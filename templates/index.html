@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Todo App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card.completed {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.pending {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .stat-card.overdue {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select, input, button {
+            padding: 10px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-todo-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .add-todo-form:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .todo-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .todo-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .todo-item.completed {
+            opacity: 0.7;
+            border-left-color: #28a745;
+        }
+
+        .todo-item.completed .todo-title {
+            text-decoration: line-through;
+        }
+
+        .todo-item.high-priority {
+            border-left-color: #dc3545;
+        }
+
+        .todo-item.medium-priority {
+            border-left-color: #ffc107;
+        }
+
+        .todo-item.low-priority {
+            border-left-color: #28a745;
+        }
+
+        .todo-item.overdue {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.1) 100%);
+            border-left-color: #dc3545;
+        }
+
+        .todo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .todo-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            flex: 1;
+        }
+
+        .todo-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.high { background: #dc3545; color: white; }
+        .badge.medium { background: #ffc107; color: #212529; }
+        .badge.low { background: #28a745; color: white; }
+        .badge.overdue { background: #dc3545; color: white; animation: pulse 2s infinite; }
+        .badge.category { background: #6c757d; color: white; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .todo-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .todo-actions button {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .btn-complete {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+        }
+
+        .bulk-actions {
+            position: sticky;
+            top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .bulk-actions.visible {
+            display: block;
+        }
+
+        .checkbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .no-todos {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .no-todos h3 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: auto;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .todo-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Your Task Companion</h1>
+            <p>कर्मण्येवाधिकारस्ते मा फलेषु कदाचन</p>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3 id="totalTodos">0</h3>
+                <p>Total Tasks</p>
+            </div>
+            <div class="stat-card completed">
+                <h3 id="completedTodos">0</h3>
+                <p>Completed</p>
+            </div>
+            <div class="stat-card pending">
+                <h3 id="pendingTodos">0</h3>
+                <p>Pending</p>
+            </div>
+            <div class="stat-card overdue">
+                <h3 id="overdueTodos">0</h3>
+                <p>Overdue</p>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search todos...">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+            </div>
+
+            <div class="control-group">
+                <label>Filter:</label>
+                <select id="filterSelect">
+                    <option value="all">All Tasks</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Category:</label>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Sort:</label>
+                <select id="sortSelect">
+                    <option value="created_at">Date Created</option>
+                    <option value="due_date">Due Date</option>
+                    <option value="priority">Priority</option>
+                </select>
+            </div>
+
+            <button onclick="toggleBulkMode()">Bulk Actions</button>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" id="bulkActions">
+            <p><span id="selectedCount">0</span> tasks selected</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="bulkComplete()">Mark Complete</button>
+                <button onclick="bulkSetPriority('high')">Set High Priority</button>
+                <button onclick="bulkDelete()" class="btn-delete">Delete Selected</button>
+                <button onclick="clearSelection()">Clear Selection</button>
+            </div>
+        </div>
+
+        <!-- Add Todo Form -->
+        <div class="add-todo-form">
+            <form id="addTodoForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="todoTitle">Task Title *</label>
+                        <input type="text" id="todoTitle" required placeholder="What needs to be done?">
+                    </div>
+                    <div class="form-group">
+                        <label for="todoPriority">Priority</label>
+                        <select id="todoPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="todoCategory">Category</label>
+                        <input type="text" id="todoCategory" placeholder="work, personal, health..." value="general">
+                    </div>
+                    <div class="form-group">
+                        <label for="todoDueDate">Due Date</label>
+                        <input type="datetime-local" id="todoDueDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="todoDescription">Description</label>
+                    <textarea id="todoDescription" placeholder="Additional details..."></textarea>
+                </div>
+
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading tasks...</p>
+        </div>
+
+        <!-- Todo List -->
+        <div class="todo-list" id="todoList">
+            <!-- Todos will be loaded here -->
+        </div>
+
+        <!-- No Todos Message -->
+        <div class="no-todos" id="noTodos" style="display: none;">
+            <h3>🎉 All caught up!</h3>
+            <p>You have no tasks matching your current filter. Great job!</p>
+        </div>
+    </div>
+
+    <script>
+        let todos = [];
+        let selectedTodos = new Set();
+        let bulkMode = false;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTodos();
+            loadStats();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('addTodoForm').addEventListener('submit', addTodo);
+            document.getElementById('filterSelect').addEventListener('change', loadTodos);
+            document.getElementById('categoryFilter').addEventListener('change', loadTodos);
+            document.getElementById('sortSelect').addEventListener('change', loadTodos);
+            document.getElementById('searchInput').addEventListener('input', debounce(filterTodos, 300));
+        }
+
+        async function loadTodos() {
+            showLoading(true);
+            
+            const filter = document.getElementById('filterSelect').value;
+            const category = document.getElementById('categoryFilter').value;
+            const sort = document.getElementById('sortSelect').value;
+            
+            try {
+                // Load from local storage
+                todos = JSON.parse(localStorage.getItem('todos')) || [];
+                
+                // Apply filters and sorting
+                let filteredTodos = todos;
+                if (filter !== 'all') {
+                    filteredTodos = todos.filter(todo => {
+                        if (filter === 'completed') return todo.completed;
+                        if (filter === 'pending') return !todo.completed;
+                        if (filter === 'overdue') return todo.is_overdue;
+                        return true;
+                    });
+                }
+                if (category !== 'all') {
+                    filteredTodos = filteredTodos.filter(todo => todo.category === category);
+                }
+                filteredTodos = sortTodos(filteredTodos, sort);
+                
+                updateCategoryFilter();
+                displayTodos(filteredTodos);
+                loadStats();
+            } catch (error) {
+                console.error('Error loading todos:', error);
+                showError('Failed to load tasks');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function sortTodos(todos, sortBy) {
+            return todos.sort((a, b) => {
+                if (sortBy === 'due_date') {
+                    return (new Date(a.due_date || Infinity) - new Date(b.due_date || Infinity));
+                } else if (sortBy === 'priority') {
+                    const priorityOrder = { high: 3, medium: 2, low: 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                } else {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                }
+            });
+        }
+
+        async function loadStats() {
+            try {
+                const stats = {
+                    total: todos.length,
+                    completed: todos.filter(t => t.completed).length,
+                    pending: todos.filter(t => !t.completed).length,
+                    overdue: todos.filter(t => t.is_overdue).length
+                };
+                
+                document.getElementById('totalTodos').textContent = stats.total;
+                document.getElementById('completedTodos').textContent = stats.completed;
+                document.getElementById('pendingTodos').textContent = stats.pending;
+                document.getElementById('overdueTodos').textContent = stats.overdue;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const categories = [...new Set(todos.map(t => t.category))].sort();
+            
+            const currentValue = categoryFilter.value;
+            categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                categoryFilter.appendChild(option);
+            });
+            
+            if (categories.includes(currentValue)) {
+                categoryFilter.value = currentValue;
+            }
+        }
+
+        function displayTodos(todosToShow) {
+            const todoList = document.getElementById('todoList');
+            const noTodos = document.getElementById('noTodos');
+            
+            if (todosToShow.length === 0) {
+                todoList.style.display = 'none';
+                noTodos.style.display = 'block';
+                return;
+            }
+            
+            todoList.style.display = 'grid';
+            noTodos.style.display = 'none';
+            
+            todoList.innerHTML = todosToShow.map(todo => createTodoHTML(todo)).join('');
+        }
+
+        function createTodoHTML(todo) {
+            const dueDate = todo.due_date ? new Date(todo.due_date).toLocaleDateString() : '';
+            const isOverdue = todo.is_overdue;
+            
+            return `
+                <div class="todo-item ${todo.completed ? 'completed' : ''} ${todo.priority}-priority ${isOverdue ? 'overdue' : ''}" 
+                     data-id="${todo.id}">
+                     
+                    ${bulkMode ? `<input type="checkbox" class="checkbox" ${selectedTodos.has(todo.id) ? 'checked' : ''} onchange="toggleSelection(${todo.id}, this.checked)">` : ''}
+                    
+                    <div class="todo-header">
+                        <div class="todo-title">${escapeHtml(todo.title)}</div>
+                    </div>
+                    
+                    <div class="todo-meta">
+                        <span class="badge ${todo.priority}">${todo.priority}</span>
+                        <span class="badge category">${todo.category}</span>
+                        ${isOverdue ? '<span class="badge overdue">OVERDUE</span>' : ''}
+                        ${dueDate ? `<span style="font-size: 12px; color: #666;">Due: ${dueDate}</span>` : ''}
+                    </div>
+                    
+                    ${todo.description ? `<div class="todo-description">${escapeHtml(todo.description)}</div>` : ''}
+                    
+                    <div class="todo-actions">
+                        <button class="btn-complete" onclick="toggleComplete(${todo.id}, ${!todo.completed})">
+                            ${todo.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button class="btn-edit" onclick="editTodo(${todo.id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteTodo(${todo.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addTodo(e) {
+            e.preventDefault();
+            
+            const todoData = {
+                id: Date.now(),
+                title: document.getElementById('todoTitle').value,
+                description: document.getElementById('todoDescription').value,
+                priority: document.getElementById('todoPriority').value,
+                category: document.getElementById('todoCategory').value || 'general',
+                due_date: document.getElementById('todoDueDate').value || null,
+                completed: false,
+                created_at: new Date().toISOString(),
+                is_overdue: false
+            };
+            
+            try {
+                todos.push(todoData);
+                localStorage.setItem('todos', JSON.stringify(todos));
+                
+                document.getElementById('addTodoForm').reset();
+                document.getElementById('todoCategory').value = 'general';
+                document.getElementById('todoDueDate').value = '';
+                loadTodos();
+                showSuccess('Task added successfully!');
+            } catch (error) {
+                console.error('Error adding todo:', error);
+                showError('Failed to add task');
+            }
+        }
+
+        async function toggleComplete(id, completed) {
+            try {
+                todos = todos.map(todo => 
+                    todo.id === id ? { ...todo, completed } : todo
+                );
+                localStorage.setItem('todos', JSON.stringify(todos));
+                loadTodos();
+                showSuccess(completed ? 'Task completed!' : 'Task reopened!');
+            } catch (error) {
+                console.error('Error updating todo:', error);
+                showError('Failed to update task');
+            }
+        }
+
+        async function deleteTodo(id) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            
+            try {
+                todos = todos.filter(todo => todo.id !== id);
+                localStorage.setItem('todos', JSON.stringify(todos));
+                selectedTodos.delete(id);
+                loadTodos();
+                showSuccess('Task deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+                showError('Failed to delete task');
+            }
+        }
+
+        function editTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+            
+            document.getElementById('todoTitle').value = todo.title;
+            document.getElementById('todoDescription').value = todo.description;
+            document.getElementById('todoPriority').value = todo.priority;
+            document.getElementById('todoCategory').value = todo.category;
+            document.getElementById('todoDueDate').value = todo.due_date || '';
+            
+            const form = document.getElementById('addTodoForm');
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+                try {
+                    todos = todos.map(t => t.id === id ? {
+                        ...t,
+                        title: document.getElementById('todoTitle').value,
+                        description: document.getElementById('todoDescription').value,
+                        priority: document.getElementById('todoPriority').value,
+                        category: document.getElementById('todoCategory').value || 'general',
+                        due_date: document.getElementById('todoDueDate').value || null
+                    } : t);
+                    localStorage.setItem('todos', JSON.stringify(todos));
+                    form.onsubmit = addTodo;
+                    form.reset();
+                    document.getElementById('todoCategory').value = 'general';
+                    document.getElementById('todoDueDate').value = '';
+                    loadTodos();
+                    showSuccess('Task updated successfully!');
+                } catch (error) {
+                    console.error('Error updating todo:', error);
+                    showError('Failed to update task');
+                }
+            };
+        }
+
+        function toggleBulkMode() {
+            bulkMode = !bulkMode;
+            document.getElementById('bulkActions').classList.toggle('visible', bulkMode);
+            selectedTodos.clear();
+            document.getElementById('selectedCount').textContent = selectedTodos.size;
+            loadTodos();
+        }
+
+        function toggleSelection(id, checked) {
+            if (checked) {
+                selectedTodos.add(id);
+            } else {
+                selectedTodos.delete(id);
+            }
+            document.getElementById('selectedCount').textContent = selectedTodos.size;
+        }
+
+        async function bulkComplete() {
+            try {
+                todos = todos.map(todo => 
+                    selectedTodos.has(todo.id) ? { ...todo, completed: true } : todo
+                );
+                localStorage.setItem('todos', JSON.stringify(todos));
+                selectedTodos.clear();
+                loadTodos();
+                showSuccess('Selected tasks marked as complete!');
+            } catch (error) {
+                console.error('Error in bulk complete:', error);
+                showError('Failed to complete tasks');
+            }
+        }
+
+        async function bulkSetPriority(priority) {
+            try {
+                todos = todos.map(todo => 
+                    selectedTodos.has(todo.id) ? { ...todo, priority } : todo
+                );
+                localStorage.setItem('todos', JSON.stringify(todos));
+                selectedTodos.clear();
+                loadTodos();
+                showSuccess(`Selected tasks set to ${priority} priority!`);
+            } catch (error) {
+                console.error('Error in bulk set priority:', error);
+                showError('Failed to update priority');
+            }
+        }
+
+        async function bulkDelete() {
+            if (!confirm('Are you sure you want to delete selected tasks?')) return;
+            
+            try {
+                todos = todos.filter(todo => !selectedTodos.has(todo.id));
+                localStorage.setItem('todos', JSON.stringify(todos));
+                selectedTodos.clear();
+                loadTodos();
+                showSuccess('Selected tasks deleted successfully!');
+            } catch (error) {
+                console.error('Error in bulk delete:', error);
+                showError('Failed to delete tasks');
+            }
+        }
+
+        function clearSelection() {
+            selectedTodos.clear();
+            document.getElementById('selectedCount').textContent = selectedTodos.size;
+            loadTodos();
+        }
+
+        function filterTodos() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredTodos = todos.filter(todo => 
+                todo.title.toLowerCase().includes(searchTerm) ||
+                (todo.description && todo.description.toLowerCase().includes(searchTerm))
+            );
+            displayTodos(filteredTodos);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showSuccess(message) {
+            alert(message);
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // Check for overdue tasks periodically
+        setInterval(() => {
+            const now = new Date();
+            todos = todos.map(todo => ({
+                ...todo,
+                is_overdue: todo.due_date && !todo.completed && new Date(todo.due_date) < now
+            }));
+            localStorage.setItem('todos', JSON.stringify(todos));
+            loadTodos();
+        }, 60000);
+    </script>
+</body>
+</html>
