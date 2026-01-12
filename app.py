@@ -164,22 +164,23 @@ def bulk_action():
     db.session.commit()
     return jsonify({'success': True})
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        
-        # Add sample data if database is empty
-        if Todo.query.count() == 0:
-            sample_todos = [
-                Todo(title="Welcome to your Todo App!", description="This is a sample todo item", priority="high", category="getting-started"),
-                Todo(title="Complete project proposal", description="Write and submit the Q4 project proposal", priority="high", category="work", due_date=datetime.utcnow() + timedelta(days=3)),
-                Todo(title="Buy groceries", description="Milk, bread, eggs, vegetables", priority="medium", category="personal"),
-                Todo(title="Call dentist", description="Schedule cleaning appointment", priority="low", category="health", due_date=datetime.utcnow() + timedelta(days=7)),
-                Todo(title="Learn Flask", description="Complete the Flask tutorial", priority="medium", category="learning", completed=True)
-            ]
-            
-            for todo in sample_todos:
-                db.session.add(todo)
-            db.session.commit()
-    
+# --- DATABASE INIT (RUNS FOR GUNICORN & LOCAL) ---
+with app.app_context():
+    db.create_all()
+
+    # Add sample data if database is empty
+    if Todo.query.count() == 0:
+        sample_todos = [
+            Todo(title="Welcome to your Todo App!", description="This is a sample todo item", priority="high", category="getting-started"),
+            Todo(title="Complete project proposal", description="Write and submit the Q4 project proposal", priority="high", category="work", due_date=datetime.utcnow() + timedelta(days=3)),
+            Todo(title="Buy groceries", description="Milk, bread, eggs, vegetables", priority="medium", category="personal"),
+            Todo(title="Call dentist", description="Schedule cleaning appointment", priority="low", category="health", due_date=datetime.utcnow() + timedelta(days=7)),
+            Todo(title="Learn Flask", description="Complete the Flask tutorial", priority="medium", category="learning", completed=True)
+        ]
+
+        db.session.add_all(sample_todos)
+        db.session.commit()
+
+# --- LOCAL DEV ONLY ---
+if __name__ == "__main__":
     app.run()
